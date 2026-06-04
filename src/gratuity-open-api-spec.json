@@ -1,0 +1,173 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Gratuity Calculator API",
+        "description": "REST API for calculating employee gratuity as per the Payment of Gratuity Act, India",
+        "contact": {
+            "name": "Gratuity App Team",
+            "email": "support@example.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "https://www.apache.org/licenses/LICENSE-2.0"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "https://kong-6df5eb3869inx9z5n.kongcloud.dev",
+            "description": "Generated server url"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Gratuity",
+            "description": "Endpoints for gratuity calculation as per the Payment of Gratuity Act, India"
+        }
+    ],
+    "paths": {
+        "/api/v1/gratuity/calculate": {
+            "post": {
+                "tags": [
+                    "Gratuity"
+                ],
+                "summary": "Calculate gratuity",
+                "description": "Calculates the gratuity amount for an employee based on last drawn basic + DA and total years/months of service.",
+                "operationId": "calculateGratuity",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GratuityRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Gratuity calculated successfully",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GratuityResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "GratuityRequest": {
+                "required": [
+                    "basicPlusDa",
+                    "monthsOfService",
+                    "yearsOfService"
+                ],
+                "type": "object",
+                "properties": {
+                    "basicPlusDa": {
+                        "type": "number",
+                        "description": "Last drawn basic salary plus Dearness Allowance (DA) in INR",
+                        "format": "double",
+                        "example": 50000.0
+                    },
+                    "yearsOfService": {
+                        "minimum": 0,
+                        "type": "integer",
+                        "description": "Completed years of service",
+                        "format": "int32",
+                        "example": 10
+                    },
+                    "monthsOfService": {
+                        "maximum": 11,
+                        "minimum": 0,
+                        "type": "integer",
+                        "description": "Additional months of service beyond completed years (0–11)",
+                        "format": "int32",
+                        "example": 8
+                    }
+                },
+                "description": "Request payload for gratuity calculation"
+            },
+            "GratuityResponse": {
+                "type": "object",
+                "properties": {
+                    "eligible": {
+                        "type": "boolean",
+                        "description": "Whether the employee is eligible for gratuity",
+                        "example": true
+                    },
+                    "eligibilityReason": {
+                        "type": "string",
+                        "description": "Reason for eligibility or ineligibility",
+                        "example": "Eligible: service >= 5 years"
+                    },
+                    "serviceYearsConsidered": {
+                        "type": "integer",
+                        "description": "Rounded service years used in the calculation",
+                        "format": "int32",
+                        "example": 10
+                    },
+                    "roundingReason": {
+                        "type": "string",
+                        "description": "Explanation of any rounding applied to service duration",
+                        "example": "Months >= 6, rounded up to 11 years"
+                    },
+                    "gratuityAmount": {
+                        "type": "number",
+                        "description": "Calculated gratuity amount in INR",
+                        "format": "double",
+                        "example": 288461.54
+                    },
+                    "currency": {
+                        "type": "string",
+                        "description": "Currency of the gratuity amount",
+                        "example": "INR"
+                    },
+                    "formula": {
+                        "type": "string",
+                        "description": "Formula used for calculation",
+                        "example": "(Basic+DA) × 15/26 × Years"
+                    },
+                    "calculationBreakdown": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object",
+                            "description": "Step-by-step breakdown of the calculation"
+                        },
+                        "description": "Step-by-step breakdown of the calculation"
+                    }
+                },
+                "description": "Gratuity calculation result"
+            },
+            "ErrorResponse": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "errors": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
